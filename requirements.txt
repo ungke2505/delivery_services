@@ -1,0 +1,3 @@
+# Frappe is a peer dependency - installed separately via bench
+# Do not list frappe here to avoid uv/pip resolver conflicts with
+# Frappe's custom pypika git dependency

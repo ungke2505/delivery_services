@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<meta name="theme-color" content="#f59e0b"/>
+<meta name="description" content="Driver App - Delivery Services"/>
+<title>Driver App</title>
+<link rel="manifest" href="/delivery/manifest-driver.json"/>
+<link rel="apple-touch-icon" href="/delivery/assets/icon-192.png"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --amber:#f59e0b;--amber-d:#d97706;--amber-l:#fef3c7;
+  --green:#10b981;--red:#ef4444;--blue:#3b82f6;--purple:#8b5cf6;
+  --bg:#f9fafb;--card:#ffffff;--text:#111827;--muted:#6b7280;
+  --border:#e5e7eb;--radius:12px;--shadow:0 1px 3px rgba(0,0,0,.1);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;max-width:480px;margin:0 auto}
+#app{flex:1;display:flex;flex-direction:column}
+.topbar{background:var(--amber);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
+.topbar h1{font-size:17px;font-weight:700;flex:1}
+.icon-btn{background:rgba(255,255,255,.25);border:none;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px}
+.bottom-nav{background:var(--card);border-top:1px solid var(--border);display:flex;position:sticky;bottom:0;z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0;cursor:pointer;font-size:10px;color:var(--muted);gap:2px;border:none;background:none;transition:.15s}
+.nav-item.active{color:var(--amber)}
+.nav-item svg{width:22px;height:22px}
+.page{display:none;flex:1;overflow-y:auto;padding:16px}
+.page.active{display:block}
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:12px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:8px;padding:11px 18px;font-size:14px;font-weight:600;cursor:pointer;transition:.15s;width:100%}
+.btn-amber{background:var(--amber);color:#fff}
+.btn-amber:active{background:var(--amber-d)}
+.btn-green{background:var(--green);color:#fff}
+.btn-red{background:var(--red);color:#fff}
+.btn-outline{background:transparent;color:var(--amber);border:1.5px solid var(--amber)}
+.btn-sm{padding:8px 14px;font-size:13px}
+.form-group{margin-bottom:14px}
+.form-label{font-size:12px;font-weight:600;color:var(--muted);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.form-control{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;outline:none;transition:.15s;background:var(--card)}
+.form-control:focus{border-color:var(--amber)}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.badge-assigned{background:#dbeafe;color:#1e40af}
+.badge-onway{background:#ede9fe;color:#5b21b6}
+.badge-arrived{background:#fef3c7;color:#b45309}
+.badge-delivered{background:#d1fae5;color:#065f46}
+.badge-failed{background:#fee2e2;color:#991b1b}
+.task-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:12px;border-left:4px solid var(--amber)}
+.task-card.delivered{border-left-color:var(--green);opacity:.8}
+.task-card.failed{border-left-color:var(--red);opacity:.7}
+.task-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:10px}
+.task-id{font-size:13px;font-weight:700}
+.task-detail{font-size:13px;color:var(--muted);margin-bottom:4px;display:flex;gap:6px;align-items:flex-start}
+.task-detail span:first-child{flex-shrink:0}
+.action-btns{display:flex;gap:8px;margin-top:12px}
+.action-btns .btn{flex:1}
+.divider{height:1px;background:var(--border);margin:12px 0}
+#auth-screen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;max-width:480px;margin:0 auto}
+.auth-logo{font-size:64px;margin-bottom:8px}
+.auth-title{font-size:24px;font-weight:800;color:var(--amber);margin-bottom:4px}
+.auth-sub{font-size:13px;color:var(--muted);margin-bottom:28px;text-align:center}
+.stat-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:16px}
+.stat-box{background:var(--card);border-radius:10px;padding:12px;text-align:center;box-shadow:var(--shadow)}
+.stat-num{font-size:22px;font-weight:800;color:var(--amber)}
+.stat-lbl{font-size:11px;color:var(--muted);margin-top:2px}
+.empty-state{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty-state .icon{font-size:48px;margin-bottom:8px}
+.section-title{font-size:15px;font-weight:700;margin-bottom:12px}
+.upload-area{border:2px dashed var(--border);border-radius:10px;padding:20px;text-align:center;cursor:pointer;background:var(--bg)}
+.upload-area:active{background:var(--amber-l)}
+.upload-area input{display:none}
+.preview-img{width:100%;border-radius:8px;margin-top:10px;max-height:180px;object-fit:cover;display:none}
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#1f2937;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;opacity:0;transition:.3s;pointer-events:none;z-index:999;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.spinner{display:flex;justify-content:center;padding:32px;color:var(--muted);font-size:13px}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal-box{background:#fff;border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:480px}
+.modal-title{font-size:16px;font-weight:700;margin-bottom:16px}
+.modal-btns{display:flex;gap:10px;margin-top:14px}
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-logo">🏍️</div>
+  <div class="auth-title">Driver App</div>
+  <div class="auth-sub">Login sebagai kurir untuk melihat tugas pengiriman Anda</div>
+  <div class="form-group" style="width:100%">
+    <label class="form-label">Email</label>
+    <input class="form-control" id="l-email" type="email" placeholder="driver@contoh.com"/>
+  </div>
+  <div class="form-group" style="width:100%">
+    <label class="form-label">Password</label>
+    <input class="form-control" id="l-pass" type="password" placeholder="••••••••"/>
+  </div>
+  <button class="btn btn-amber" style="width:100%" onclick="doLogin()">Masuk</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+  <div class="topbar">
+    <span style="font-size:20px">🏍️</span>
+    <h1 id="topbar-title">Tugas Aktif</h1>
+    <div id="online-dot" style="width:8px;height:8px;border-radius:50%;background:#d1fae5;margin-right:4px"></div>
+    <button class="icon-btn" onclick="doLogout()">⇤</button>
+  </div>
+
+  <!-- PAGE: Tugas Aktif -->
+  <div class="page active" id="page-tasks">
+    <div class="stat-row" id="stat-row">
+      <div class="stat-box"><div class="stat-num" id="stat-active">-</div><div class="stat-lbl">Aktif</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-today">-</div><div class="stat-lbl">Hari ini</div></div>
+      <div class="stat-box"><div class="stat-num" id="stat-done">-</div><div class="stat-lbl">Selesai</div></div>
+    </div>
+    <div class="section-title">Tugas Pengiriman</div>
+    <div id="task-list"></div>
+  </div>
+
+  <!-- PAGE: Riwayat -->
+  <div class="page" id="page-history">
+    <div class="section-title">Riwayat Pengiriman</div>
+    <div id="history-list"></div>
+  </div>
+
+  <!-- PAGE: Profil Driver -->
+  <div class="page" id="page-profile">
+    <div class="card" style="text-align:center;padding:24px 16px">
+      <div style="font-size:48px;margin-bottom:8px">👤</div>
+      <div id="drv-name" style="font-size:18px;font-weight:700"></div>
+      <div id="drv-email" style="font-size:13px;color:var(--muted);margin-top:4px"></div>
+      <div style="margin-top:8px"><span class="badge badge-assigned">Delivery Driver</span></div>
+    </div>
+    <div class="card">
+      <div class="section-title">Statistik Saya</div>
+      <div id="profile-stats"></div>
+    </div>
+    <button class="btn btn-red" style="margin-top:8px" onclick="doLogout()">Keluar</button>
+  </div>
+
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="showPage('tasks',this);loadTasks()">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6M9 16h4"/></svg>
+      Tugas
+    </button>
+    <button class="nav-item" onclick="showPage('history',this);loadHistory()">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Riwayat
+    </button>
+    <button class="nav-item" onclick="showPage('profile',this);loadProfile()">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profil
+    </button>
+  </nav>
+</div>
+
+<!-- MODAL: Update Status -->
+<div class="modal-overlay" id="status-modal">
+  <div class="modal-box">
+    <div class="modal-title" id="status-modal-title">Update Status</div>
+    <div class="form-group">
+      <label class="form-label">Catatan (opsional)</label>
+      <input class="form-control" id="status-note" placeholder="Kendala, info tambahan..."/>
+    </div>
+    <div id="status-btns" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div class="modal-btns">
+      <button class="btn btn-outline btn-sm" onclick="closeStatusModal()">Batal</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: Upload Bukti -->
+<div class="modal-overlay" id="proof-modal">
+  <div class="modal-box">
+    <div class="modal-title">Upload Bukti Pengiriman</div>
+    <input type="hidden" id="proof-task-id"/>
+    <div class="form-group">
+      <label class="form-label">Keterangan</label>
+      <input class="form-control" id="proof-note" placeholder="Diterima oleh siapa..."/>
+    </div>
+    <div class="upload-area" onclick="document.getElementById('proof-file').click()">
+      <div style="font-size:32px">📷</div>
+      <p style="font-size:13px;color:var(--muted);margin-top:4px">Foto bukti pengiriman</p>
+      <input type="file" id="proof-file" accept="image/*" capture="environment" onchange="previewProof(this)"/>
+      <img id="proof-preview" class="preview-img"/>
+    </div>
+    <div class="modal-btns">
+      <button class="btn btn-outline btn-sm" onclick="closeProofModal()" style="flex:1">Batal</button>
+      <button class="btn btn-green btn-sm" onclick="submitProof()" style="flex:1">Upload & Selesai</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = '/api/method/delivery_services.api';
+let currentUser = null;
+let activeTasks = [];
+
+// ── Init ───────────────────────────────────────────────────────────────────
+(async () => {
+  const s = await apiFetch(`${API}.get_session_user`, {}, true);
+  if (s?.logged_in && s?.is_driver) {
+    currentUser = s;
+    showApp();
+  } else if (s?.logged_in && !s?.is_driver) {
+    toast('Akun ini bukan driver. Hubungi admin.');
+  }
+})();
+
+// ── Auth ───────────────────────────────────────────────────────────────────
+async function doLogin() {
+  const email = document.getElementById('l-email').value.trim();
+  const pass  = document.getElementById('l-pass').value;
+  if (!email || !pass) return toast('Isi email dan password');
+
+  const r = await apiFetch('/api/method/login', {usr: email, pwd: pass}, true, 'POST');
+  if (r?.message === 'Logged In') {
+    const s = await apiFetch(`${API}.get_session_user`, {}, true);
+    if (!s?.is_driver) {
+      await apiFetch('/api/method/logout', {}, true);
+      return toast('Akun ini tidak memiliki akses driver.');
+    }
+    currentUser = s;
+    showApp();
+  } else {
+    toast('Email atau password salah');
+  }
+}
+
+async function doLogout() {
+  await apiFetch('/api/method/logout', {}, true);
+  currentUser = null;
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('auth-screen').style.display = 'flex';
+}
+
+function showApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('drv-name').textContent = currentUser.full_name;
+  document.getElementById('drv-email').textContent = currentUser.user;
+  loadTasks();
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/delivery/assets/sw.js').catch(() => {});
+  }
+  // Auto-refresh setiap 60 detik
+  setInterval(() => {
+    if (document.getElementById('page-tasks').classList.contains('active')) loadTasks();
+  }, 60000);
+}
+
+// ── Navigation ─────────────────────────────────────────────────────────────
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  const titles = {tasks:'Tugas Aktif', history:'Riwayat', profile:'Profil Saya'};
+  document.getElementById('topbar-title').textContent = titles[name] || '';
+}
+
+// ── Tasks ──────────────────────────────────────────────────────────────────
+async function loadTasks() {
+  const el = document.getElementById('task-list');
+  el.innerHTML = '<div class="spinner">Memuat tugas...</div>';
+
+  const r = await apiFetch(`${API}.get_my_tasks`, {}, false);
+  activeTasks = r || [];
+
+  // Stats
+  const allToday = await apiFetch(`${API}.get_driver_history`, {page:1, page_size:100}, false);
+  const todayDone = (allToday?.tasks || []).filter(t => {
+    if (!t.delivered_at) return false;
+    return new Date(t.delivered_at).toDateString() === new Date().toDateString();
+  }).length;
+
+  document.getElementById('stat-active').textContent = activeTasks.length;
+  document.getElementById('stat-today').textContent = todayDone;
+  document.getElementById('stat-done').textContent = allToday?.total || 0;
+
+  if (!activeTasks.length) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">✅</div><p>Tidak ada tugas aktif saat ini</p><p style="font-size:12px;margin-top:4px">Cek riwayat untuk pengiriman sebelumnya</p></div>';
+    return;
+  }
+
+  el.innerHTML = activeTasks.map(t => renderTaskCard(t)).join('');
+}
+
+function renderTaskCard(t) {
+  const badgeClass = {
+    'Assigned':'badge-assigned','On The Way':'badge-onway',
+    'Arrived':'badge-arrived','Delivered':'badge-delivered','Failed':'badge-failed'
+  }[t.status] || 'badge-assigned';
+
+  const isCOD = t.payment_method === 'COD';
+  const nextActions = getNextActions(t.status);
+
+  return `
+  <div class="task-card ${t.status === 'Delivered' ? 'delivered' : t.status === 'Failed' ? 'failed' : ''}" id="task-${t.name}">
+    <div class="task-header">
+      <div>
+        <div class="task-id">📦 ${t.order}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:2px">${formatDate(t.creation)}</div>
+      </div>
+      <span class="badge ${badgeClass}">${t.status}</span>
+    </div>
+
+    <div class="task-detail"><span>📍</span><span>${t.delivery_address}</span></div>
+    <div class="task-detail"><span>💳</span><span>${t.payment_method}${isCOD ? ` — <strong>Tagih ${formatIDR(t.total_amount)}</strong>` : ' (Sudah lunas)'}</span></div>
+
+    ${t.items?.length ? `
+    <div class="divider"></div>
+    <div style="font-size:12px;color:var(--muted)">${t.items.map(i => `${i.product_name} ×${i.qty}`).join(' · ')}</div>
+    ` : ''}
+
+    ${t.estimated_arrival ? `<div class="task-detail" style="margin-top:6px"><span>⏰</span><span>Estimasi: ${formatDate(t.estimated_arrival)}</span></div>` : ''}
+
+    ${nextActions.length ? `
+    <div class="action-btns">
+      ${nextActions.map(a => `
+        <button class="btn btn-sm ${a.cls}" onclick="${a.action}('${t.name}','${a.status}')">
+          ${a.label}
+        </button>
+      `).join('')}
+    </div>
+    ` : ''}
+  </div>`;
+}
+
+function getNextActions(status) {
+  if (status === 'Assigned') return [
+    {label:'🏍️ Berangkat', cls:'btn-amber', status:'On The Way', action:'updateStatus'}
+  ];
+  if (status === 'On The Way') return [
+    {label:'📍 Tiba', cls:'btn-amber', status:'Arrived', action:'updateStatus'},
+    {label:'✗ Gagal', cls:'btn-red', status:'Failed', action:'updateStatus'}
+  ];
+  if (status === 'Arrived') return [
+    {label:'✓ Serahkan', cls:'btn-green', status:'Delivered', action:'confirmDelivered'},
+    {label:'✗ Gagal', cls:'btn-red', status:'Failed', action:'updateStatus'}
+  ];
+  return [];
+}
+
+// Update status reguler (Berangkat, Tiba, Gagal)
+function updateStatus(taskId, status) {
+  document.getElementById('status-modal-title').textContent =
+    status === 'On The Way' ? '🏍️ Konfirmasi Berangkat'
+    : status === 'Arrived' ? '📍 Konfirmasi Tiba'
+    : '⚠️ Tandai Gagal';
+
+  document.getElementById('status-note').value = '';
+
+  const btnsEl = document.getElementById('status-btns');
+  btnsEl.innerHTML = `
+    <button class="btn ${status === 'Failed' ? 'btn-red' : 'btn-amber'}" onclick="doUpdateStatus('${taskId}','${status}')">
+      Konfirmasi
+    </button>`;
+
+  document.getElementById('status-modal').classList.add('open');
+}
+
+async function doUpdateStatus(taskId, status) {
+  const note = document.getElementById('status-note').value;
+  const r = await apiFetch(`${API}.update_delivery_status`, {task_id: taskId, status, note}, false, 'POST');
+  if (r) {
+    toast(`✓ Status diperbarui: ${status}`);
+    closeStatusModal();
+    loadTasks();
+  } else {
+    toast('Gagal update status. Coba lagi.');
+  }
+}
+
+function closeStatusModal() {
+  document.getElementById('status-modal').classList.remove('open');
+}
+
+// Serahkan barang — update status SEKALIGUS upload bukti
+function confirmDelivered(taskId) {
+  // Update status ke Delivered dulu, lalu minta upload foto
+  openProofModal(taskId);
+}
+
+function openProofModal(taskId) {
+  document.getElementById('proof-task-id').value = taskId;
+  document.getElementById('proof-note').value = '';
+  document.getElementById('proof-preview').style.display = 'none';
+  document.getElementById('proof-file').value = '';
+  document.getElementById('proof-modal').classList.add('open');
+}
+
+function closeProofModal() {
+  document.getElementById('proof-modal').classList.remove('open');
+}
+
+function previewProof(input) {
+  if (!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('proof-preview');
+    img.src = e.target.result;
+    img.style.display = 'block';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+async function submitProof() {
+  const taskId = document.getElementById('proof-task-id').value;
+  const note   = document.getElementById('proof-note').value;
+  const file   = document.getElementById('proof-file').files[0];
+
+  // Update status ke Delivered
+  const statusR = await apiFetch(`${API}.update_delivery_status`, {
+    task_id: taskId, status: 'Delivered', note
+  }, false, 'POST');
+
+  if (!statusR) return toast('Gagal update status Delivered');
+
+  // Upload foto jika ada
+  if (file) {
+    const fd = new FormData();
+    fd.append('file', file, file.name);
+    fd.append('is_private', '0');
+    fd.append('doctype', 'DS Delivery Task');
+    fd.append('fieldname', 'delivery_proofs');
+
+    try {
+      const res = await fetch('/api/method/upload_file', {
+        method: 'POST',
+        headers: {'X-Frappe-CSRF-Token': getCsrf()},
+        body: fd,
+      });
+      const data = await res.json();
+      const fileUrl = data.message?.file_url;
+
+      if (fileUrl) {
+        await apiFetch(`${API}.upload_delivery_proof`, {
+          task_id: taskId, file_url: fileUrl, note
+        }, false, 'POST');
+      }
+    } catch (e) {
+      console.error('Upload foto gagal:', e);
+    }
+  }
+
+  toast('✅ Pengiriman selesai!');
+  closeProofModal();
+  loadTasks();
+}
+
+// ── History ────────────────────────────────────────────────────────────────
+async function loadHistory() {
+  const el = document.getElementById('history-list');
+  el.innerHTML = '<div class="spinner">Memuat riwayat...</div>';
+  const r = await apiFetch(`${API}.get_driver_history`, {page:1, page_size:30}, false);
+  const tasks = r?.tasks || [];
+
+  if (!tasks.length) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>Belum ada riwayat</p></div>';
+    return;
+  }
+
+  el.innerHTML = tasks.map(t => `
+    <div class="card" style="border-left:4px solid ${t.status === 'Delivered' ? 'var(--green)' : 'var(--red)'}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <strong style="font-size:13px">📦 ${t.order}</strong>
+        <span class="badge ${t.status === 'Delivered' ? 'badge-delivered' : 'badge-failed'}">${t.status}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:4px">📍 ${t.delivery_address}</div>
+      <div style="display:flex;justify-content:space-between;font-size:12px">
+        <span>${t.payment_method}</span>
+        <strong style="color:var(--green)">${formatIDR(t.total_amount)}</strong>
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">
+        ${t.delivered_at ? '✓ ' + formatDate(t.delivered_at) : ''}
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── Profile ────────────────────────────────────────────────────────────────
+async function loadProfile() {
+  if (currentUser) {
+    document.getElementById('drv-name').textContent = currentUser.full_name;
+    document.getElementById('drv-email').textContent = currentUser.user;
+  }
+  const r = await apiFetch(`${API}.get_driver_history`, {page:1, page_size:999}, false);
+  const tasks = r?.tasks || [];
+  const delivered = tasks.filter(t => t.status === 'Delivered');
+  const totalRevenue = delivered.reduce((s, t) => s + (t.total_amount || 0), 0);
+
+  document.getElementById('profile-stats').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div class="stat-box"><div class="stat-num">${delivered.length}</div><div class="stat-lbl">Terkirim</div></div>
+      <div class="stat-box"><div class="stat-num">${tasks.length - delivered.length}</div><div class="stat-lbl">Gagal</div></div>
+    </div>
+    <div style="margin-top:10px;padding:12px;background:var(--amber-l);border-radius:8px;text-align:center">
+      <div style="font-size:11px;color:var(--muted)">Total Nilai Kiriman</div>
+      <div style="font-size:20px;font-weight:800;color:var(--amber-d)">${formatIDR(totalRevenue)}</div>
+    </div>
+  `;
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+async function apiFetch(url, params = {}, allowGuest = false, method = 'GET') {
+  try {
+    const opts = {
+      method,
+      headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-Frappe-CSRF-Token': getCsrf()},
+    };
+    if (method === 'POST') {
+      opts.body = new URLSearchParams(params).toString();
+    } else if (Object.keys(params).length) {
+      url += (url.includes('?') ? '&' : '?') + new URLSearchParams(params).toString();
+    }
+    const r = await fetch(url, opts);
+    const data = await r.json();
+    return data.message !== undefined ? data.message : data;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+}
+
+function getCsrf() {
+  return (document.cookie.split(';').find(c => c.trim().startsWith('csrf_token=')) || '').split('=')[1] || 'None';
+}
+
+function formatIDR(n) {
+  return 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+}
+
+function formatDate(dt) {
+  if (!dt) return '';
+  return new Date(dt).toLocaleString('id-ID', {day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2800);
+}
+</script>
+</body>
+</html>

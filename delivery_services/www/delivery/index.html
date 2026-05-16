@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"/>
+<meta name="theme-color" content="#10b981"/>
+<meta name="description" content="Belanja & pesan antar langsung ke pintumu"/>
+<title>Delivery Services</title>
+<link rel="manifest" href="/delivery/manifest.json"/>
+<link rel="apple-touch-icon" href="/delivery/assets/icon-192.png"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --green:#10b981;--green-d:#059669;--green-l:#d1fae5;
+  --amber:#f59e0b;--red:#ef4444;--gray:#6b7280;
+  --bg:#f9fafb;--card:#ffffff;--text:#111827;--muted:#6b7280;
+  --border:#e5e7eb;--radius:12px;--shadow:0 1px 3px rgba(0,0,0,.1);
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;flex-direction:column;max-width:480px;margin:0 auto}
+#app{flex:1;display:flex;flex-direction:column;overflow:hidden}
+/* ─ Header ─ */
+.topbar{background:var(--green);color:#fff;padding:14px 16px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:100}
+.topbar h1{font-size:18px;font-weight:700;flex:1}
+.topbar .icon-btn{background:rgba(255,255,255,.2);border:none;color:#fff;width:36px;height:36px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:18px}
+/* ─ Nav ─ */
+.bottom-nav{background:var(--card);border-top:1px solid var(--border);display:flex;position:sticky;bottom:0;z-index:100}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;padding:8px 0;cursor:pointer;font-size:10px;color:var(--muted);gap:2px;border:none;background:none;transition:.15s}
+.nav-item.active{color:var(--green)}
+.nav-item svg{width:22px;height:22px}
+/* ─ Pages ─ */
+.page{display:none;flex:1;overflow-y:auto;padding:16px}
+.page.active{display:block}
+/* ─ Cards ─ */
+.card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);padding:16px;margin-bottom:12px}
+/* ─ Buttons ─ */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:8px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;transition:.15s}
+.btn-primary{background:var(--green);color:#fff}
+.btn-primary:active{background:var(--green-d)}
+.btn-full{width:100%}
+.btn-outline{background:transparent;color:var(--green);border:1.5px solid var(--green)}
+.btn-sm{padding:7px 14px;font-size:13px}
+.btn-danger{background:var(--red);color:#fff}
+/* ─ Forms ─ */
+.form-group{margin-bottom:14px}
+.form-label{font-size:13px;font-weight:600;color:var(--muted);margin-bottom:5px;display:block}
+.form-control{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;outline:none;transition:.15s;background:var(--card)}
+.form-control:focus{border-color:var(--green)}
+/* ─ Search ─ */
+.search-bar{background:var(--card);border:1.5px solid var(--border);border-radius:10px;display:flex;align-items:center;padding:0 12px;gap:8px;margin-bottom:14px}
+.search-bar input{flex:1;border:none;padding:10px 0;font-size:14px;outline:none;background:transparent}
+/* ─ Product grid ─ */
+.product-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.product-card{background:var(--card);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;cursor:pointer;transition:.15s}
+.product-card:active{transform:scale(.97)}
+.product-card img{width:100%;height:130px;object-fit:cover;background:#f3f4f6}
+.product-card .img-placeholder{width:100%;height:130px;background:linear-gradient(135deg,#d1fae5,#a7f3d0);display:flex;align-items:center;justify-content:center;font-size:36px}
+.product-card .info{padding:10px}
+.product-card .name{font-size:13px;font-weight:600;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.product-card .price{font-size:14px;font-weight:700;color:var(--green)}
+.product-card .stock{font-size:11px;color:var(--muted)}
+.add-btn{width:100%;margin-top:8px;background:var(--green);color:#fff;border:none;border-radius:6px;padding:7px;font-size:13px;font-weight:600;cursor:pointer}
+/* ─ Cart ─ */
+.cart-item{display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.cart-item:last-child{border:none}
+.cart-item .name{flex:1;font-size:14px;font-weight:500}
+.qty-ctrl{display:flex;align-items:center;gap:8px}
+.qty-ctrl button{width:28px;height:28px;border-radius:6px;border:1.5px solid var(--border);background:var(--card);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.qty-ctrl span{font-weight:700;min-width:20px;text-align:center}
+.cart-price{font-size:13px;font-weight:700;color:var(--green);min-width:70px;text-align:right}
+/* ─ Badge ─ */
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600}
+.badge-orange{background:#fef3c7;color:#b45309}
+.badge-green{background:#d1fae5;color:#065f46}
+.badge-blue{background:#dbeafe;color:#1e40af}
+.badge-red{background:#fee2e2;color:#991b1b}
+.badge-purple{background:#ede9fe;color:#5b21b6}
+/* ─ Status timeline ─ */
+.timeline{padding:8px 0}
+.tl-item{display:flex;gap:12px;margin-bottom:12px}
+.tl-dot{width:12px;height:12px;border-radius:50%;background:var(--border);flex-shrink:0;margin-top:3px}
+.tl-dot.done{background:var(--green)}
+.tl-dot.active{background:var(--amber)}
+.tl-line{width:2px;background:var(--border);margin:3px auto 0;height:100%}
+/* ─ Toast ─ */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:#1f2937;color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;opacity:0;transition:.3s;pointer-events:none;z-index:999;white-space:nowrap}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+/* ─ Loading ─ */
+.spinner{display:flex;justify-content:center;padding:32px;color:var(--muted);font-size:13px}
+.cart-badge{position:absolute;top:6px;right:6px;background:var(--red);color:#fff;font-size:10px;font-weight:700;min-width:16px;height:16px;border-radius:8px;display:flex;align-items:center;justify-content:center;padding:0 3px}
+.nav-wrap{position:relative}
+/* ─ Auth ─ */
+#auth-screen{position:fixed;inset:0;background:var(--bg);z-index:500;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;max-width:480px;margin:0 auto}
+.auth-logo{font-size:48px;margin-bottom:8px}
+.auth-title{font-size:24px;font-weight:800;color:var(--green);margin-bottom:4px}
+.auth-sub{font-size:14px;color:var(--muted);margin-bottom:24px;text-align:center}
+.auth-tabs{display:flex;gap:0;margin-bottom:20px;border:1.5px solid var(--border);border-radius:8px;overflow:hidden}
+.auth-tab{flex:1;padding:9px;text-align:center;cursor:pointer;font-weight:600;font-size:14px;background:transparent;border:none;transition:.15s}
+.auth-tab.active{background:var(--green);color:#fff}
+.select-control{width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;font-size:14px;outline:none;background:var(--card)}
+.section-title{font-size:16px;font-weight:700;margin-bottom:12px}
+.order-status-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.order-total{font-size:15px;font-weight:700;color:var(--green)}
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-state .icon{font-size:48px;margin-bottom:8px}
+.upload-area{border:2px dashed var(--border);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:.15s}
+.upload-area:hover{border-color:var(--green);background:var(--green-l)}
+.upload-area input{display:none}
+.preview-img{width:100%;border-radius:8px;margin-top:10px;max-height:200px;object-fit:cover;display:none}
+.category-chips{display:flex;gap:8px;overflow-x:auto;margin-bottom:12px;padding-bottom:2px;scrollbar-width:none}
+.category-chips::-webkit-scrollbar{display:none}
+.chip{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--card);font-size:13px;cursor:pointer;white-space:nowrap;flex-shrink:0;font-weight:500}
+.chip.active{background:var(--green);color:#fff;border-color:var(--green)}
+</style>
+</head>
+<body>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-logo">🛵</div>
+  <div class="auth-title">DeliverEase</div>
+  <div class="auth-sub">Pesan sekarang, tiba di pintu Anda</div>
+  <div class="auth-tabs">
+    <button class="auth-tab active" onclick="switchTab('login')">Masuk</button>
+    <button class="auth-tab" onclick="switchTab('register')">Daftar</button>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="login-form" style="width:100%">
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input class="form-control" id="l-email" type="email" placeholder="email@contoh.com"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-control" id="l-pass" type="password" placeholder="••••••••"/>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="doLogin()">Masuk</button>
+  </div>
+
+  <!-- REGISTER -->
+  <div id="register-form" style="width:100%;display:none">
+    <div class="form-group">
+      <label class="form-label">Nama Lengkap</label>
+      <input class="form-control" id="r-name" placeholder="Nama Anda"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email</label>
+      <input class="form-control" id="r-email" type="email" placeholder="email@contoh.com"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">No. HP</label>
+      <input class="form-control" id="r-phone" type="tel" placeholder="08xx-xxxx-xxxx"/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Password</label>
+      <input class="form-control" id="r-pass" type="password" placeholder="Min. 8 karakter"/>
+    </div>
+    <button class="btn btn-primary btn-full" onclick="doRegister()">Daftar Sekarang</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" style="display:none">
+  <div class="topbar">
+    <span style="font-size:22px">🛵</span>
+    <h1 id="topbar-title">Katalog</h1>
+    <button class="icon-btn" onclick="doLogout()" title="Logout">⇤</button>
+  </div>
+
+  <!-- PAGE: Katalog -->
+  <div class="page active" id="page-home">
+    <div class="search-bar">
+      <span>🔍</span>
+      <input id="search-input" placeholder="Cari produk..." oninput="debounceSearch()"/>
+    </div>
+    <div class="category-chips" id="category-chips"></div>
+    <div id="product-list"></div>
+    <div id="load-more-wrap" style="text-align:center;padding:10px 0;display:none">
+      <button class="btn btn-outline btn-sm" onclick="loadMoreProducts()">Muat lebih</button>
+    </div>
+  </div>
+
+  <!-- PAGE: Cart -->
+  <div class="page" id="page-cart">
+    <div class="section-title">Keranjang Belanja</div>
+    <div id="cart-list"></div>
+    <div id="cart-summary" style="display:none" class="card">
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+        <span style="font-size:15px;font-weight:600">Total</span>
+        <span class="order-total" id="cart-total">Rp 0</span>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="goToCheckout()">Lanjut ke Checkout →</button>
+    </div>
+  </div>
+
+  <!-- PAGE: Checkout -->
+  <div class="page" id="page-checkout">
+    <div class="section-title">Checkout</div>
+    <div class="card">
+      <div class="form-group">
+        <label class="form-label">Alamat Pengiriman</label>
+        <textarea class="form-control" id="co-address" rows="3" placeholder="Jl. Contoh No. 1, Kecamatan, Kota"></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Metode Pembayaran</label>
+        <select class="select-control" id="co-payment" onchange="onPaymentMethodChange()">
+          <option value="COD">COD (Bayar di tempat)</option>
+          <option value="Transfer">Transfer Bank</option>
+        </select>
+      </div>
+      <div id="transfer-info" style="display:none;margin-bottom:14px" class="card" style="background:#f0fdf4;border:1.5px solid var(--green)">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:4px">Transfer ke:</p>
+        <p style="font-weight:700">BCA - 1234567890</p>
+        <p style="font-weight:700">a.n. PT Delivery Services</p>
+        <p style="font-size:12px;color:var(--muted);margin-top:6px">Upload bukti setelah checkout di halaman Pesanan Saya</p>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Catatan (opsional)</label>
+        <input class="form-control" id="co-notes" placeholder="Titip di depan pintu, dll."/>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:12px">
+        <span>Total Pesanan</span>
+        <strong class="order-total" id="co-total">Rp 0</strong>
+      </div>
+      <button class="btn btn-primary btn-full" onclick="placeOrder()">Buat Pesanan</button>
+    </div>
+  </div>
+
+  <!-- PAGE: Orders -->
+  <div class="page" id="page-orders">
+    <div class="section-title">Pesanan Saya</div>
+    <div id="order-list"></div>
+  </div>
+
+  <!-- PAGE: Profile -->
+  <div class="page" id="page-profile">
+    <div class="section-title">Profil Saya</div>
+    <div class="card">
+      <div style="text-align:center;padding:16px 0">
+        <div style="font-size:48px;margin-bottom:8px">👤</div>
+        <div id="profile-name" style="font-size:18px;font-weight:700"></div>
+        <div id="profile-email" style="font-size:13px;color:var(--muted);margin-top:2px"></div>
+      </div>
+      <button class="btn btn-danger btn-full" onclick="doLogout()">Keluar</button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="showPage('home',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      Katalog
+    </button>
+    <button class="nav-item nav-wrap" onclick="showPage('cart',this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 002 1.61h9.72a2 2 0 002-1.61L23 6H6"/></svg>
+      Keranjang
+      <span class="cart-badge" id="cart-badge" style="display:none">0</span>
+    </button>
+    <button class="nav-item" onclick="showPage('orders',this);loadOrders()">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+      Pesanan
+    </button>
+    <button class="nav-item" onclick="showPage('profile',this);loadProfile()">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      Profil
+    </button>
+  </nav>
+</div>
+
+<div id="toast"></div>
+
+<!-- UPLOAD MODAL -->
+<div id="upload-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:600;align-items:flex-end">
+  <div style="background:#fff;border-radius:20px 20px 0 0;padding:24px;width:100%;max-width:480px;margin:0 auto">
+    <div style="font-size:16px;font-weight:700;margin-bottom:14px">Upload Bukti Transfer</div>
+    <div class="form-group">
+      <label class="form-label">Order ID</label>
+      <input class="form-control" id="up-order-id" readonly/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Nama Bank</label>
+      <input class="form-control" id="up-bank" placeholder="BCA / BNI / Mandiri ..."/>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Tanggal Transfer</label>
+      <input class="form-control" id="up-date" type="date"/>
+    </div>
+    <div class="upload-area" onclick="document.getElementById('up-file').click()">
+      <div style="font-size:32px">📷</div>
+      <p style="font-size:13px;color:var(--muted);margin-top:4px">Tap untuk pilih foto bukti</p>
+      <input type="file" id="up-file" accept="image/*" onchange="previewUpload(this)"/>
+      <img id="up-preview" class="preview-img"/>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn btn-outline btn-full" onclick="closeUploadModal()">Batal</button>
+      <button class="btn btn-primary btn-full" onclick="submitProof()">Kirim Bukti</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ─────────────────────────────────────────────────────────────────
+const API = '/api/method/delivery_services.api';
+let cart = JSON.parse(localStorage.getItem('ds_cart') || '[]');
+let currentUser = null;
+let products = [];
+let productPage = 1;
+let currentCategory = '';
+let searchTimer;
+
+// ── Init ──────────────────────────────────────────────────────────────────
+(async () => {
+  const s = await apiFetch('/api/method/delivery_services.api.get_session_user', {}, true);
+  if (s?.logged_in) {
+    currentUser = s;
+    showApp();
+  }
+})();
+
+// ── Auth ──────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
+  document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+  document.querySelectorAll('.auth-tab').forEach((t, i) => {
+    t.classList.toggle('active', (i === 0) === (tab === 'login'));
+  });
+}
+
+async function doLogin() {
+  const email = document.getElementById('l-email').value.trim();
+  const pass = document.getElementById('l-pass').value;
+  if (!email || !pass) return toast('Isi email dan password');
+  const r = await apiFetch('/api/method/login', {usr: email, pwd: pass}, true, 'POST');
+  if (r?.message === 'Logged In') {
+    const s = await apiFetch('/api/method/delivery_services.api.get_session_user', {}, true);
+    currentUser = s;
+    showApp();
+  } else {
+    toast('Email atau password salah');
+  }
+}
+
+async function doRegister() {
+  const name = document.getElementById('r-name').value.trim();
+  const email = document.getElementById('r-email').value.trim();
+  const phone = document.getElementById('r-phone').value.trim();
+  const pass = document.getElementById('r-pass').value;
+  if (!name || !email || !phone || !pass) return toast('Lengkapi semua data');
+  if (pass.length < 8) return toast('Password minimal 8 karakter');
+  const r = await apiFetch(`${API}.register_customer`, {full_name:name,email,phone,password:pass}, true, 'POST');
+  if (r?.message?.email) {
+    toast('Registrasi berhasil! Silakan login.');
+    switchTab('login');
+    document.getElementById('l-email').value = email;
+  } else {
+    toast(r?.exc || 'Registrasi gagal');
+  }
+}
+
+async function doLogout() {
+  await apiFetch('/api/method/logout', {}, true, 'GET');
+  cart = [];
+  saveCart();
+  currentUser = null;
+  document.getElementById('auth-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+function showApp() {
+  document.getElementById('auth-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  loadCategories();
+  loadProducts(true);
+  updateCartBadge();
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/delivery/assets/sw.js').catch(() => {});
+  }
+}
+
+// ── Navigation ─────────────────────────────────────────────────────────────
+function showPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('page-' + name).classList.add('active');
+  if (btn) btn.classList.add('active');
+  const titles = {home:'Katalog',cart:'Keranjang',checkout:'Checkout',orders:'Pesanan Saya',profile:'Profil'};
+  document.getElementById('topbar-title').textContent = titles[name] || '';
+}
+
+// ── Products ───────────────────────────────────────────────────────────────
+async function loadCategories() {
+  const r = await apiFetch(`${API}.get_categories`, {}, true);
+  const cats = r || [];
+  const el = document.getElementById('category-chips');
+  el.innerHTML = `<div class="chip active" onclick="filterCategory('',this)">Semua</div>` +
+    cats.map(c => `<div class="chip" onclick="filterCategory('${c}',this)">${c}</div>`).join('');
+}
+
+function filterCategory(cat, el) {
+  currentCategory = cat;
+  document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  loadProducts(true);
+}
+
+function debounceSearch() {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => loadProducts(true), 400);
+}
+
+async function loadProducts(reset = false) {
+  if (reset) { productPage = 1; products = []; }
+  const search = document.getElementById('search-input').value.trim();
+  const r = await apiFetch(`${API}.get_products`, {
+    search, category: currentCategory, page: productPage, page_size: 12
+  }, true);
+  if (!r) return;
+  if (reset) products = r.products;
+  else products.push(...r.products);
+
+  renderProducts();
+  document.getElementById('load-more-wrap').style.display = r.has_more ? 'block' : 'none';
+}
+
+function loadMoreProducts() {
+  productPage++;
+  loadProducts(false);
+}
+
+function renderProducts() {
+  const el = document.getElementById('product-list');
+  if (!products.length) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">🔍</div><p>Produk tidak ditemukan</p></div>';
+    return;
+  }
+  el.innerHTML = `<div class="product-grid">${products.map(p => `
+    <div class="product-card" onclick="showProductDetail('${p.name}')">
+      ${p.image
+        ? `<img src="${p.image}" alt="${p.product_name}" loading="lazy"/>`
+        : `<div class="img-placeholder">🛍️</div>`}
+      <div class="info">
+        <div class="name">${p.product_name}</div>
+        <div class="price">${formatIDR(p.price)}</div>
+        <div class="stock">Stok: ${p.stock_qty} ${p.unit || 'pcs'}</div>
+        <button class="add-btn" onclick="event.stopPropagation();addToCart(${JSON.stringify(p).replace(/"/g,'&quot;')})">+ Keranjang</button>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+function showProductDetail(id) {
+  const p = products.find(x => x.name === id);
+  if (!p) return;
+  // Simple alert-style modal (bisa dikembangkan)
+  if (confirm(`${p.product_name}\n${formatIDR(p.price)}\nStok: ${p.stock_qty}\n\nTambah ke keranjang?`)) {
+    addToCart(p);
+  }
+}
+
+// ── Cart ───────────────────────────────────────────────────────────────────
+function addToCart(product) {
+  const idx = cart.findIndex(i => i.name === product.name);
+  if (idx >= 0) {
+    cart[idx].qty++;
+  } else {
+    cart.push({...product, qty: 1});
+  }
+  saveCart();
+  toast(`✓ ${product.product_name} ditambahkan`);
+}
+
+function saveCart() {
+  localStorage.setItem('ds_cart', JSON.stringify(cart));
+  updateCartBadge();
+}
+
+function updateCartBadge() {
+  const total = cart.reduce((s, i) => s + i.qty, 0);
+  const badge = document.getElementById('cart-badge');
+  badge.style.display = total ? 'flex' : 'none';
+  badge.textContent = total;
+}
+
+function renderCart() {
+  const el = document.getElementById('cart-list');
+  const summary = document.getElementById('cart-summary');
+  if (!cart.length) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">🛒</div><p>Keranjang masih kosong</p></div>';
+    summary.style.display = 'none';
+    return;
+  }
+  el.innerHTML = cart.map((item, idx) => `
+    <div class="card cart-item">
+      <div class="name">${item.product_name}<br><small style="color:var(--muted)">${formatIDR(item.price)}</small></div>
+      <div class="qty-ctrl">
+        <button onclick="changeQty(${idx},-1)">−</button>
+        <span>${item.qty}</span>
+        <button onclick="changeQty(${idx},1)">+</button>
+      </div>
+      <div class="cart-price">${formatIDR(item.price * item.qty)}</div>
+    </div>
+  `).join('');
+  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  document.getElementById('cart-total').textContent = formatIDR(total);
+  summary.style.display = 'block';
+}
+
+function changeQty(idx, delta) {
+  cart[idx].qty += delta;
+  if (cart[idx].qty <= 0) cart.splice(idx, 1);
+  saveCart();
+  renderCart();
+}
+
+function goToCheckout() {
+  if (!cart.length) return toast('Keranjang kosong');
+  const total = cart.reduce((s, i) => s + i.price * i.qty, 0);
+  document.getElementById('co-total').textContent = formatIDR(total);
+  showPage('checkout');
+}
+
+function onPaymentMethodChange() {
+  const method = document.getElementById('co-payment').value;
+  document.getElementById('transfer-info').style.display = method === 'Transfer' ? 'block' : 'none';
+}
+
+async function placeOrder() {
+  const address = document.getElementById('co-address').value.trim();
+  const payment = document.getElementById('co-payment').value;
+  const notes = document.getElementById('co-notes').value.trim();
+  if (!address) return toast('Isi alamat pengiriman');
+  if (!cart.length) return toast('Keranjang kosong');
+
+  const items = cart.map(i => ({
+    product: i.name,
+    product_name: i.product_name,
+    qty: i.qty,
+    price: i.price,
+  }));
+
+  const r = await apiFetch(`${API}.create_order`, {
+    items: JSON.stringify(items),
+    delivery_address: address,
+    payment_method: payment,
+    notes,
+  }, false, 'POST');
+
+  if (r?.order_id) {
+    cart = [];
+    saveCart();
+    toast(`✓ Order #${r.order_id} berhasil dibuat!`);
+    showPage('orders');
+    loadOrders();
+    // Otomatis buka upload jika transfer
+    if (payment === 'Transfer') {
+      setTimeout(() => openUploadModal(r.order_id), 800);
+    }
+  } else {
+    toast('Gagal membuat order. Coba lagi.');
+  }
+}
+
+// ── Orders ─────────────────────────────────────────────────────────────────
+async function loadOrders() {
+  const el = document.getElementById('order-list');
+  el.innerHTML = '<div class="spinner">Memuat...</div>';
+  const r = await apiFetch(`${API}.get_my_orders`, {}, false);
+  if (!r?.orders?.length) {
+    el.innerHTML = '<div class="empty-state"><div class="icon">📋</div><p>Belum ada pesanan</p></div>';
+    return;
+  }
+  el.innerHTML = r.orders.map(o => `
+    <div class="card">
+      <div class="order-status-row">
+        <strong style="font-size:13px">#${o.name}</strong>
+        <span class="badge ${statusBadge(o.status)}">${o.status}</span>
+      </div>
+      <div style="font-size:12px;color:var(--muted);margin-bottom:6px">${formatDate(o.order_date)}</div>
+      <div style="font-size:13px;margin-bottom:8px">${(o.items||[]).map(i=>`${i.product_name} ×${i.qty}`).join(', ')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="order-total">${formatIDR(o.total_amount)}</span>
+        <span style="font-size:12px;color:var(--muted)">${o.payment_method}</span>
+      </div>
+      ${o.status === 'Pending' && o.payment_method === 'Transfer' ? `
+        <button class="btn btn-primary btn-sm btn-full" style="margin-top:8px" onclick="openUploadModal('${o.name}')">Upload Bukti Transfer</button>
+      ` : ''}
+    </div>
+  `).join('');
+}
+
+// ── Upload ─────────────────────────────────────────────────────────────────
+function openUploadModal(orderId) {
+  document.getElementById('up-order-id').value = orderId;
+  document.getElementById('up-date').value = new Date().toISOString().slice(0,10);
+  document.getElementById('up-preview').style.display = 'none';
+  document.getElementById('up-file').value = '';
+  document.getElementById('upload-modal').style.display = 'flex';
+}
+
+function closeUploadModal() {
+  document.getElementById('upload-modal').style.display = 'none';
+}
+
+function previewUpload(input) {
+  if (!input.files[0]) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = document.getElementById('up-preview');
+    img.src = e.target.result;
+    img.style.display = 'block';
+  };
+  reader.readAsDataURL(input.files[0]);
+}
+
+async function submitProof() {
+  const orderId = document.getElementById('up-order-id').value;
+  const bank = document.getElementById('up-bank').value;
+  const date = document.getElementById('up-date').value;
+  const file = document.getElementById('up-file').files[0];
+  if (!file) return toast('Pilih foto bukti transfer dulu');
+
+  // Upload file ke Frappe
+  const fd = new FormData();
+  fd.append('file', file, file.name);
+  fd.append('is_private', '0');
+  fd.append('doctype', 'DS Payment');
+  fd.append('fieldname', 'bukti_transfer');
+
+  const res = await fetch('/api/method/upload_file', {
+    method: 'POST',
+    headers: {'X-Frappe-CSRF-Token': getCsrf()},
+    body: fd,
+  });
+  const data = await res.json();
+  if (!data.message?.file_url) return toast('Gagal upload foto');
+
+  const r = await apiFetch(`${API}.upload_payment_proof`, {
+    order_id: orderId,
+    file_url: data.message.file_url,
+    bank_name: bank,
+    transfer_date: date,
+  }, false, 'POST');
+
+  if (r?.payment_id) {
+    toast('✓ Bukti transfer berhasil dikirim!');
+    closeUploadModal();
+    loadOrders();
+  } else {
+    toast('Gagal mengirim bukti');
+  }
+}
+
+// ── Profile ────────────────────────────────────────────────────────────────
+function loadProfile() {
+  if (currentUser) {
+    document.getElementById('profile-name').textContent = currentUser.full_name || currentUser.user;
+    document.getElementById('profile-email').textContent = currentUser.user;
+  }
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────
+async function apiFetch(url, params = {}, allowGuest = false, method = 'GET') {
+  try {
+    const opts = {
+      method,
+      headers: {'Content-Type': 'application/x-www-form-urlencoded', 'X-Frappe-CSRF-Token': getCsrf()},
+    };
+    if (method === 'POST') {
+      opts.body = new URLSearchParams(params).toString();
+    } else if (Object.keys(params).length) {
+      url += (url.includes('?') ? '&' : '?') + new URLSearchParams(params).toString();
+    }
+    const r = await fetch(url, opts);
+    const data = await r.json();
+    if (data.exc && !allowGuest) {
+      const msg = data.exc_type === '_dict' ? data.message : (data.exc || 'Error');
+      console.error(msg);
+    }
+    return data.message !== undefined ? data.message : data;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
+}
+
+function getCsrf() {
+  return (document.cookie.split(';').find(c => c.trim().startsWith('csrf_token=')) || '').split('=')[1] || 'None';
+}
+
+function formatIDR(n) {
+  return 'Rp ' + Number(n || 0).toLocaleString('id-ID');
+}
+
+function formatDate(dt) {
+  if (!dt) return '';
+  return new Date(dt).toLocaleString('id-ID', {day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+
+function statusBadge(s) {
+  const m = {
+    'Pending':'badge-orange','Payment Uploaded':'badge-blue','Confirmed':'badge-green',
+    'Assigned':'badge-blue','On The Way':'badge-purple','Arrived':'badge-orange',
+    'Delivered':'badge-green','Delivery Failed':'badge-red','Cancelled':'badge-red',
+  };
+  return m[s] || 'badge-orange';
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// Re-render cart when visiting cart page
+document.querySelector('[onclick*="cart"]') && (() => {
+  const orig = document.querySelector('button[onclick*="page-cart"]');
+})();
+document.querySelectorAll('.nav-item').forEach(b => {
+  if (b.textContent.includes('Keranjang')) {
+    b.addEventListener('click', () => { renderCart(); });
+  }
+});
+</script>
+</body>
+</html>

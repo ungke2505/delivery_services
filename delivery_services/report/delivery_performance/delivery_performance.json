@@ -1,0 +1,20 @@
+{
+ "add_total_row": 0,
+ "creation": "2024-01-01 00:00:00",
+ "disable_prepared_report": 0,
+ "disabled": 0,
+ "doctype": "Report",
+ "is_standard": "Yes",
+ "module": "Delivery Services",
+ "modified": "2024-01-01 00:00:00",
+ "modified_by": "Administrator",
+ "name": "Delivery Performance DS",
+ "owner": "Administrator",
+ "ref_doctype": "DS Delivery Task",
+ "report_name": "Delivery Performance DS",
+ "report_type": "Script Report",
+ "roles": [
+  {"role": "Delivery Admin"},
+  {"role": "System Manager"}
+ ]
+}

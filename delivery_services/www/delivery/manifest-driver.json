@@ -1,0 +1,27 @@
+{
+  "name": "Driver App - Delivery Services",
+  "short_name": "Driver App",
+  "description": "Aplikasi kurir untuk mengelola tugas pengiriman",
+  "start_url": "/delivery/driver",
+  "scope": "/delivery",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f9fafb",
+  "theme_color": "#f59e0b",
+  "lang": "id",
+  "icons": [
+    {
+      "src": "/delivery/assets/icon-driver-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/delivery/assets/icon-driver-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["productivity", "utilities"]
+}

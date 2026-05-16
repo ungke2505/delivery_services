@@ -1,0 +1,160 @@
+{
+ "actions": [],
+ "autoname": "format:DS-TASK-{YYYY}{MM}{DD}-{#####}",
+ "creation": "2024-01-01 00:00:00",
+ "doctype": "DocType",
+ "engine": "InnoDB",
+ "field_order": [
+  "order",
+  "customer_user",
+  "status",
+  "column_break_1",
+  "driver_user",
+  "driver_name",
+  "estimated_arrival",
+  "section_delivery",
+  "delivery_address",
+  "total_amount",
+  "payment_method",
+  "column_break_2",
+  "departed_at",
+  "delivered_at",
+  "notes",
+  "section_proofs",
+  "delivery_proofs"
+ ],
+ "fields": [
+  {
+   "fieldname": "order",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Order",
+   "options": "DS Order",
+   "reqd": 1
+  },
+  {
+   "fieldname": "customer_user",
+   "fieldtype": "Link",
+   "label": "Customer",
+   "options": "User"
+  },
+  {
+   "default": "Assigned",
+   "fieldname": "status",
+   "fieldtype": "Select",
+   "in_list_view": 1,
+   "label": "Status",
+   "options": "Assigned\nOn The Way\nArrived\nDelivered\nFailed",
+   "reqd": 1
+  },
+  {
+   "fieldname": "column_break_1",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "driver_user",
+   "fieldtype": "Link",
+   "in_list_view": 1,
+   "label": "Driver",
+   "options": "User",
+   "reqd": 1
+  },
+  {
+   "fieldname": "driver_name",
+   "fieldtype": "Data",
+   "label": "Nama Driver",
+   "read_only": 1
+  },
+  {
+   "fieldname": "estimated_arrival",
+   "fieldtype": "Datetime",
+   "label": "Estimasi Tiba"
+  },
+  {
+   "fieldname": "section_delivery",
+   "fieldtype": "Section Break",
+   "label": "Info Pengiriman"
+  },
+  {
+   "fieldname": "delivery_address",
+   "fieldtype": "Small Text",
+   "label": "Alamat Tujuan"
+  },
+  {
+   "fieldname": "total_amount",
+   "fieldtype": "Currency",
+   "label": "Total"
+  },
+  {
+   "fieldname": "payment_method",
+   "fieldtype": "Select",
+   "label": "Metode Bayar",
+   "options": "COD\nTransfer"
+  },
+  {
+   "fieldname": "column_break_2",
+   "fieldtype": "Column Break"
+  },
+  {
+   "fieldname": "departed_at",
+   "fieldtype": "Datetime",
+   "label": "Waktu Berangkat",
+   "read_only": 1
+  },
+  {
+   "fieldname": "delivered_at",
+   "fieldtype": "Datetime",
+   "label": "Waktu Selesai",
+   "read_only": 1
+  },
+  {
+   "fieldname": "notes",
+   "fieldtype": "Small Text",
+   "label": "Catatan Driver"
+  },
+  {
+   "fieldname": "section_proofs",
+   "fieldtype": "Section Break",
+   "label": "Bukti Pengiriman"
+  },
+  {
+   "fieldname": "delivery_proofs",
+   "fieldtype": "Table",
+   "label": "Foto Bukti",
+   "options": "DS Delivery Proof"
+  }
+ ],
+ "links": [],
+ "modified": "2024-01-01 00:00:00",
+ "modified_by": "Administrator",
+ "module": "Delivery Services",
+ "name": "DS Delivery Task",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "delete": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "Delivery Admin",
+   "write": 1
+  },
+  {
+   "create": 1,
+   "delete": 1,
+   "read": 1,
+   "role": "System Manager",
+   "write": 1
+  },
+  {
+   "read": 1,
+   "role": "Delivery Driver",
+   "write": 1
+  }
+ ],
+ "sort_field": "creation",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}
